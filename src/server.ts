@@ -1,8 +1,10 @@
 import dotEnv from 'dotenv'
 
 import express from 'express'
+import http from 'http'
 import mongoose from 'mongoose'
 import cors from 'cors'
+import socketIo from 'socket.io'
 
 import routes from './routes'
 dotEnv.config()
@@ -21,6 +23,14 @@ class Server {
   private middlewares (): void {
     this.express.use(express.json())
     this.express.use(cors())
+
+    const serverIo = http.Server(this.express)
+    const io = socketIo(serverIo)
+
+    this.express.use((req: express.Request, res: express.Response, next: express.NextFunction) => {
+      req.io = io
+      return next()
+    })
   }
 
   private database (): void {
